@@ -22,5 +22,4 @@ public class User {
     private LocalDateTime dateOfRegistration = LocalDateTime.now();
     @DBRef
     private List<Post> posts = new ArrayList<>();
-
 }

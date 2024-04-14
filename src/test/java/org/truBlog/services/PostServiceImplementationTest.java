@@ -43,24 +43,5 @@ public class PostServiceImplementationTest {
         assertEquals("Inception", post.getTitle());
     }
 
-//    @Test
-//    public void userCanCreateAPost_UserEditsAPostTest() {
-//        assertEquals(0, postRepository.count());
-//
-//        createPostRequest.setUsername("john123");
-//        createPostRequest.setTitle("Inception");
-//        createPostRequest.setContent("Dreams within dreams.");
-//
-//        postService.createPost(createPostRequest);
-//        String id =  postService.createdPostId();
-//        assertEquals(1, postRepository.count());
-//
-//        editPostRequest.setPostId(id);
-//        editPostRequest.setUsername("john123");
-//        editPostRequest.setEditedTitle("Inception Concept");
-//        editPostRequest.setEditedContent("Planting an Idea");
-//
-//        postService.editPost(editPostRequest);
-//        assertEquals("Inception Concept", postRepository.findById(id).get().getTitle());
-//    }
+
 }

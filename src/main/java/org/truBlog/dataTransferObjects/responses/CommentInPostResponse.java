@@ -3,8 +3,9 @@ package org.truBlog.dataTransferObjects.responses;
 import lombok.Data;
 
 @Data
-public class CommentOnPostResponse {
+public class CommentInPostResponse {
+    private String commentId;
     private String comment;
     private String timeOfComment;
-
+    private String commenterUsername;
 }

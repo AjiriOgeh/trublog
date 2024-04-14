@@ -1,12 +1,10 @@
 package org.truBlog.utilities;
 
+import org.truBlog.data.models.Comment;
 import org.truBlog.data.models.Post;
 import org.truBlog.data.models.User;
 import org.truBlog.data.models.View;
-import org.truBlog.dataTransferObjects.requests.CreatePostRequest;
-import org.truBlog.dataTransferObjects.requests.EditPostRequest;
-import org.truBlog.dataTransferObjects.requests.RegisterRequest;
-import org.truBlog.dataTransferObjects.requests.ViewPostRequest;
+import org.truBlog.dataTransferObjects.requests.*;
 import org.truBlog.dataTransferObjects.responses.*;
 import org.truBlog.exceptions.PostNotFoundException;
 
@@ -60,8 +58,8 @@ public class Mappers {
 
     public static Post editPostRequestMap(EditPostRequest editPostRequest, User user){
         Post post = findUserPost(editPostRequest.getPostId(), user);
-        post.setTitle(editPostRequest.getEditedTitle());
-        post.setContent(editPostRequest.getEditedContent());
+        if (editPostRequest.getEditedTitle() != null) post.setTitle(editPostRequest.getEditedTitle());
+        if (editPostRequest.getEditedContent() != null) post.setContent(editPostRequest.getEditedContent());
         return post;
     }
 
@@ -82,9 +80,9 @@ public class Mappers {
         return editPostResponse;
     }
 
-    public static View createViewPost(Optional<User> user) {
+    public static View createViewPost(User user) {
         View view = new View();
-        view.setViewer(user.get().getUsername());
+        view.setViewer(user.getUsername());
         return view;
     }
 
@@ -94,5 +92,36 @@ public class Mappers {
         viewPostResponse.setViewer(view.getViewer());
         viewPostResponse.setTimeOfView(view.getTimeOfView().format(DateTimeFormatter.ofPattern("MMM dd, yyy hh: mm: ss a")));
         return viewPostResponse;
+    }
+
+    public static DeletePostResponse deletePostResponseMap(Post post) {
+        DeletePostResponse deletePostResponse = new DeletePostResponse();
+        deletePostResponse.setId(post.getId());
+        deletePostResponse.setTitle(post.getTitle());
+        return deletePostResponse;
+    }
+
+    public static Comment commentOnPostRequestMap(CommentInPostRequest commentInPostRequest, User user) {
+        Comment comment = new Comment();
+        comment.setComment(commentInPostRequest.getComment());
+        comment.setCommenter(user);
+        return comment;
+    }
+
+    public static CommentInPostResponse commentOnPostResponseMap(Comment comment) {
+        CommentInPostResponse commentInPostResponse = new CommentInPostResponse();
+        commentInPostResponse.setComment(comment.getComment());
+        commentInPostResponse.setCommentId(comment.getId());
+        commentInPostResponse.setCommenterUsername(comment.getCommenter().getUsername());
+        commentInPostResponse.setTimeOfComment(comment.getTimeOfComment().format(DateTimeFormatter.ofPattern("MMM dd, yyy hh: mm: ss a")));
+        return commentInPostResponse;
+    }
+
+    public static DeleteCommentInPostResponse deleteCommentInPostResponseMap(Comment comment, Post post) {
+        DeleteCommentInPostResponse deleteCommentInPostResponse = new DeleteCommentInPostResponse();
+        deleteCommentInPostResponse.setComment(comment.getComment());
+        deleteCommentInPostResponse.setCommentId(comment.getId());
+        deleteCommentInPostResponse.setPostId(post.getId());
+        return deleteCommentInPostResponse;
     }
 }

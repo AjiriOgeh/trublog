@@ -2,13 +2,17 @@ package org.truBlog.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.truBlog.data.models.Comment;
 import org.truBlog.data.models.Post;
 import org.truBlog.data.models.User;
 import org.truBlog.data.models.View;
 import org.truBlog.data.repositories.PostRepository;
 import org.truBlog.dataTransferObjects.requests.*;
-import org.truBlog.dataTransferObjects.responses.CommentOnPostResponse;
+import org.truBlog.dataTransferObjects.responses.CommentInPostResponse;
+import org.truBlog.dataTransferObjects.responses.DeleteCommentInPostResponse;
+import org.truBlog.dataTransferObjects.responses.DeletePostResponse;
 import org.truBlog.dataTransferObjects.responses.ViewPostResponse;
+import org.truBlog.exceptions.CommentNotFoundException;
 import org.truBlog.exceptions.PostNotFoundException;
 
 import java.util.Optional;
@@ -35,12 +39,6 @@ public class PostServiceImplementation implements PostService {
         return newPost;
     }
 
-    @Override
-    public String createdPostId() {
-        int index = postRepository.findAll().size() - 1;
-        return postRepository.findAll().get(index).getId();
-    }
-
     private Post findPostById(String id) {
         Optional<Post> post = postRepository.findById(id);
         if (post.isEmpty()) throw new PostNotFoundException(String.format("Post %s does not Exist", id));
@@ -55,15 +53,15 @@ public class PostServiceImplementation implements PostService {
     }
 
     @Override
-    public void deletePost(DeletePostRequest deletePostRequest, User user) {
+    public DeletePostResponse deletePost(DeletePostRequest deletePostRequest, User user) {
         Post post = findPostById(deletePostRequest.getPostId());
-        //if (user.getPassword().equals(deletePostRequest.))
-//        user.getPosts().remove(post);
+        DeletePostResponse deletePostResponse = deletePostResponseMap(post);
         postRepository.delete(post);
+        return deletePostResponse;
     }
 
     @Override
-    public ViewPostResponse viewPost(ViewPostRequest viewPostRequest, Optional<User> user) {
+    public ViewPostResponse viewPost(ViewPostRequest viewPostRequest, User user) {
         Post post = findPostById(viewPostRequest.getId());
         View view = viewService.viewPost(viewPostRequest, user);
         post.getViews().add(view);
@@ -72,11 +70,35 @@ public class PostServiceImplementation implements PostService {
     }
 
     @Override
-    public CommentOnPostResponse commentInPost(CommentOnPostRequest commentOnPostRequest, Optional<User> user) {
-        Post post = findPostById(commentOnPostRequest.getPostId());
-        viewService.commentOnPost(commentOnPostRequest, user, post);
-        return null;
+    public CommentInPostResponse commentInPost(CommentInPostRequest commentInPostRequest, User user) {
+        Post post = findPostById(commentInPostRequest.getPostId());
+        Comment newComment = commentService.commentOnPost(commentInPostRequest,  user);
+        View newView = viewService.commentOnPost(commentInPostRequest, user, post);
+        post.getViews().add(newView);
+        post.getComments().add(newComment);
+        postRepository.save(post);
+        return commentOnPostResponseMap(newComment);
     }
+
+    @Override
+    public DeleteCommentInPostResponse deleteCommentInPost(DeleteCommentInPostRequest deleteCommentInPostRequest, User user) {
+        Post post = findPostById(deleteCommentInPostRequest.getPostId());
+        DeleteCommentInPostResponse deleteCommentInPostResponse = commentService.deleteCommentInPost(deleteCommentInPostRequest, post);
+        Comment comment = findCommentById(deleteCommentInPostRequest.getCommentId(), post);
+        post.getComments().remove(comment);
+        postRepository.save(post);
+        return deleteCommentInPostResponse;
+    }
+
+    private Comment findCommentById(String id, Post post) {
+        for(int count = 0; count < post.getComments().size(); count++) {
+            if (post.getComments().get(count).getId().equals(id)) {
+                return post.getComments().get(count);
+            }
+        }
+        throw new CommentNotFoundException("Comment does not exist");
+    }
+
 
 
 }

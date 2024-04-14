@@ -8,11 +8,10 @@ public interface UserService {
     LoginResponse login(LoginRequest loginRequest);
     LogoutResponse logout(LogoutRequest logoutRequest);
     CreatePostResponse createPost(CreatePostRequest createPostRequest);
-    String registeredUserId();
-    String createdPostId();
     EditPostResponse editPost(EditPostRequest editPostRequest);
     DeletePostResponse deletePost(DeletePostRequest deletePostRequest);
     ViewPostResponse viewPost(ViewPostRequest viewPostRequest);
-    void createAnonymousUser();
-    CommentOnPostResponse commentInPost(CommentOnPostRequest commentOnPostRequest);
+    CommentInPostResponse commentInPost(CommentInPostRequest commentInPostRequest);
+
+    DeleteCommentInPostResponse deleteCommentInPost(DeleteCommentInPostRequest deleteCommentInPostRequest);
 }
